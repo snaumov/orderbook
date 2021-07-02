@@ -41,6 +41,7 @@ function OrderBook({ newOrders, feed, subscribeETH, subscribeXBT, close }: Props
         } else {
             orders.current.drop();
             orders.current.setTickSize(feed === Feed.XBT ? TickSizeXBT.Small : TickSizeEth.Small);
+            setTickSize(feed === Feed.XBT ? TickSizeXBT.Small : TickSizeEth.Small);
             setAsks(orders.current.getAsks());
             setBids(orders.current.getBids());
         }
