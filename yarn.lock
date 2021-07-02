@@ -1695,6 +1695,11 @@
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-0.0.39.tgz#e177e699ee1b8c22d23174caaa7422644389509f"
   integrity sha512-EYNwp3bU+98cpU4lAWYYL7Zz+2gryWH1qbdDTidVd6hkiR6weksdbMadyXKXNPEkQFhXM+hVO9ZygomHXp+AIw==
 
+"@types/functional-red-black-tree@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@types/functional-red-black-tree/-/functional-red-black-tree-1.0.0.tgz#3d4b3eae7323f1fe4e7fa7bbd97a359c3187172d"
+  integrity sha512-Zne5g06/Ywy55xUqcJLls7zVkme+tkRK4UPaW28eMWE6rYzeqirlKbCZqc0CF2Yb1bMl8Od2FVZOB2tDe/gTpg==
+
 "@types/glob@^7.1.1":
   version "7.1.3"
   resolved "https://registry.yarnpkg.com/@types/glob/-/glob-7.1.3.tgz#e6ba80f36b7daad2c685acd9266382e68985c183"

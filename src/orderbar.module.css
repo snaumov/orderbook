@@ -1,0 +1,19 @@
+.orderbar {
+    display: flex;
+}
+
+.orderbarItem {
+    flex: 1 1 0px;
+    justify-self: end;
+    text-align: end;
+    margin: 2px 5% 2px 5%;
+}
+
+.price {
+    color: #4C8B66;
+}
+
+.headerItem {
+    color: #585F6E;
+    margin-bottom: 5px;
+}
