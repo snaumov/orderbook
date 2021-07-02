@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import throttle from 'lodash.throttle';
 
 export enum Feed {
     XBT,
@@ -6,7 +7,8 @@ export enum Feed {
 }
 
 enum WsError {
-    CannotSubscribe = "Can not subscribe to feed",
+    CannotConnect = "Can not connect to the server",
+    CannotSubscribe = "Can not subscribe to a feed",
 }
 
 enum ProductId {
@@ -14,35 +16,44 @@ enum ProductId {
     ETHUSD = 'PI_ETHUSD',
 }
 
+const WS_THROUGHPUT = 50; // ms
+
+/**
+ * Websocket hook. Handles connection and sending/receiving.
+ */
 export function useWs(url: string) {
     const [data, setData] = useState({});
+    const setDataThrottled = useRef(throttle(setData, WS_THROUGHPUT)).current;
+
     const [feed, setFeed] = useState<Feed | null>(null);
     const [error, setError] = useState<WsError | null>(null);
     const ws = useRef<WebSocket | null>(null);
 
     useEffect(() => {
-        ws.current = new WebSocket(url);
-        ws.current.onopen = () => {
-            subscribeXBT();
-        };
-        ws.current.onclose = () => {};
-        ws.current.onmessage = handleMessage; 
-    }, [url]);
+        // Connect to websocket endpoint
+        try {
+            ws.current = new WebSocket(url);
+        } 
+        catch (e) {
+            setError(WsError.CannotConnect);
+        }
+    }, [url]); 
 
-    const handleMessage = (e: MessageEvent<any>) => {
+    const handleMessage = useCallback((e: MessageEvent<any>) => {
         try {
             const data = JSON.parse(e.data);
 
-            // console.log(data);
             if (data.event === "subscribed" && Array.isArray(data.product_ids)) {
                 if (data.product_ids.length) {
                     const productId = data.product_ids[0];
                     if (productId === ProductId.XBTUSD) {
+                        setData({});
                         setFeed(Feed.XBT);
                         setError(null);
                         return;
                     }
                     else if (productId === ProductId.ETHUSD) {
+                        setData({});
                         setFeed(Feed.ETH);
                         setError(null);
                         return;
@@ -52,21 +63,21 @@ export function useWs(url: string) {
             }
 
             if (data.event === "unsubscribed") {
-                setFeed(null);
                 setData({});
+                setFeed(null);
                 return;
             }
 
             if (data.bids || data.asks) {
-                setData(data);
+                setDataThrottled(data);
             }
         } 
         catch (e) {
             console.log(e);
         }
-    }
-
-    function subscribeETH () {
+    }, [setDataThrottled]);
+    
+    const subscribeETH = () => {
         if (feed === Feed.ETH) {
             return;
         }
@@ -82,7 +93,7 @@ export function useWs(url: string) {
         }
     };
 
-    const subscribeXBT = () => {
+    const subscribeXBT = useCallback(() => {
         if (feed === Feed.XBT) {
             return;
         }
@@ -96,7 +107,7 @@ export function useWs(url: string) {
         catch (e) {
             setError(WsError.CannotSubscribe)
         }
-    };
+    }, [feed]);
     
     const unsubscribeETH = () => {
         ws.current?.send(JSON.stringify({"event":"unsubscribe","feed":"book_ui_1","product_ids":["PI_ETHUSD"]}));
@@ -110,7 +121,18 @@ export function useWs(url: string) {
         if (feed !== null) {
             feed === Feed.XBT ? unsubscribeXBT() : unsubscribeETH();
         }
-    }
+    };
+
+    useEffect(() => {
+        // Bind websocket listeners.
+
+        if (ws.current) {
+            ws.current.onopen = () => {
+                subscribeXBT();
+            };
+            ws.current.onmessage = handleMessage; 
+        }
+    }, [ws, subscribeXBT, handleMessage]);
 
     return {
         close,

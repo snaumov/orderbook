@@ -6,17 +6,21 @@ import './app.css';
 
 function App() {
 
-  const {data, subscribeETH, subscribeXBT, feed, close} = useWs("wss://www.cryptofacilities.com/ws/v1");
+  const {data, subscribeETH, subscribeXBT, feed, close, error} = useWs("wss://www.cryptofacilities.com/ws/v1");
 
   return (
     <div className="App">
-      <OrderBook 
-        newOrders={data}
-        subscribeETH={subscribeETH}
-        subscribeXBT={subscribeXBT}
-        feed={feed}
-        close={close}
-      />
+      {error ? 
+        <div>💥</div>
+        : 
+        <OrderBook 
+          newOrders={data}
+          subscribeETH={subscribeETH}
+          subscribeXBT={subscribeXBT}
+          feed={feed}
+          close={close}
+        />
+      }
     </div>
   );
 }

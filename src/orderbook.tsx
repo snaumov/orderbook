@@ -26,10 +26,12 @@ function OrderBook({ newOrders, feed, subscribeETH, subscribeXBT, close }: Props
     useEffect(() => {
         // Will replace the current orders with the new ones
 
-        orders.current.addOrders(newOrders);
-        setAsks(orders.current.getAsks());
-        setBids(orders.current.getBids());
-    }, [newOrders]);
+        if (feed !== null) {
+            orders.current.addOrders(newOrders);
+            setAsks(orders.current.getAsks());
+            setBids(orders.current.getBids());
+        }
+    }, [newOrders, feed]);
     
     useEffect(() => {
         // Nullifies the current bids/asks on feed switch (except on an initial render) 
@@ -88,7 +90,7 @@ function OrderBook({ newOrders, feed, subscribeETH, subscribeXBT, close }: Props
                     {bids.map((bid, idx) => <OrderBar isBid isFirst={!isMobile && (idx === 0)} order={bid} max={bids.length && bids[bids.length - 1][2]} key={`${bid[1]}_${bid[2]}`} isMobile={isMobile} />)}
                 </div>
                 <div className={styles.asks}>
-                    {(isMobile ? asks.reverse() : asks).map((ask, idx) => <OrderBar isFirst={idx === 0} order={ask} max={asks.length && asks[isMobile ? 0 : asks.length - 1][2]} key={`${ask[1]}_${ask[2]}`} isMobile={isMobile} />)}
+                    {(isMobile ? [...asks].reverse() : asks).map((ask, idx) => <OrderBar isFirst={idx === 0} order={ask} max={asks.length && asks[asks.length - 1][2]} key={`${ask[1]}_${ask[2]}`} isMobile={isMobile} />)}
                 </div>
             </div>
             <div className={styles.footer}>
